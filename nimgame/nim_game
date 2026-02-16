@@ -1,0 +1,753 @@
+//  main.cpp
+//  NIM_GAME
+
+#include <iostream>
+#include <cmath>
+#include <array>
+#include <random>
+#include <vector>
+using namespace std;
+
+string player1;
+string player2;
+unsigned char ascii=65;
+int p1=1, p2=1, p3=1, p4=1, p5=1;
+double token_total=0;
+size_t vecTotal;
+
+const size_t two_players_heaps{5};
+array <char, two_players_heaps> twoplayers{1,2,3,4,5};
+
+static default_random_engine engine (static_cast <unsigned int>(time(0)));
+
+void userVsUser(int, int);
+void checkRow (char, int);
+void displayRow();
+void randomz(int);
+void vectors(int, double);
+
+void printvector(int);
+void PCvsUSER(int);
+void checkRowVEC (char, int);
+size_t getHeapSize(char);
+
+vector<string> row_a;
+vector<string> row_b;
+vector<string> row_c;
+vector<string> row_d;
+vector<string> row_e;
+vector<string> row_f;
+vector<string> row_g;
+vector<string> row_h;
+vector<string> row_i;
+vector<string> row_j;
+
+double heaps=0;
+
+
+int main() {
+    
+    int s=0;
+
+    double tokens=0;
+    
+    int turn=1;
+    
+    cout << "NIM GAME \n1. Single player \n2. Two players \n3. Rules" << endl;
+    
+    while (s > 2 || s < 1) {
+        cout << "\nSelect game mode (1, 2 or 3)  ";
+        cin >> s;
+        
+        if (s==3) {
+            cout << "\nRules : \nEach player can pick up from one pile. \nThe player can only take one or two tokens per turn. \nDO NOOTT select a row that doesn't exist otherwise your turn may be skipped or the program may end. \nThe winner is the player who makes the last move. \nMay the best nimmer win! >:)" << endl;
+        }
+    }
+    
+    switch (s) {
+        case 1:
+            cout << "\nYou chose Single player mode.";
+            cout << "\nEnter your name: ";
+            cin >> player1 ;
+            
+            while (heaps < 2 || heaps > 10)
+            {
+                cout << "\nSelect how many heaps you want to play with (between 2 and 10): ";
+                cin >> heaps;
+            }
+            
+            cout << endl;
+
+///// initialization of heaps
+            for (double k=1; k<heaps+1; k++)
+            {
+                tokens = round(10*exp(-((pow((k-5), 2))/10.89)));
+                token_total += tokens;
+
+                vectors(k, tokens);
+
+                cout << endl;
+            }
+    
+            cout << "\nThere are " << token_total << " tokens in total. The game will end once there are no tokens left. Good luck!";
+/////// GAME BEGIN!
+
+            PCvsUSER(turn);
+
+    break;
+
+        case 2:
+            cout << "\nYou chose Two players mode";
+            cout << "\nPlayer 1, enter your name: ";
+            cin >> player1;
+            
+            cout << "\nPlayer 2, enter your name: ";
+            cin >> player2;
+            
+            while (tokens < 5) {
+            cout << "\nEnter the number of tokens to start the game (must be greater or equal to 5): ";
+                cin >> tokens;
+            }
+            
+            randomz(tokens);
+            userVsUser(tokens, turn);
+            
+            break;
+    
+    }
+    
+    return 0;
+}
+
+
+void userVsUser(int total, int turn){
+    
+    unsigned char row = 64;
+    int amount=0;
+    ascii=65;
+    
+    if (turn==1) {
+        while ((row!='A' || row!='B' || row!='C' || row!='D' || row!='E') && (amount<1 || amount>2)) {
+            cout << "\n" << player1 << "'s turn. \nEnter the letter of the heap (A, B, C...) and the amount of tokens to nim (1 or 2): ";
+            
+            cin >> row;
+            cin >> amount;
+            
+            if ((p1==0 && row=='A') || (p2==0 && row=='B') || (p3==0 && row=='C') || (p4==0 && row=='D') || (p5==0 && row=='E')) {
+                cout << "\nYou can't remove anymore tokens from row " << row << ". Try again";
+                row=64; amount=0;
+            }
+        }
+        
+        
+    checkRow(row, amount);
+    
+    total=p1+p2+p3+p4+p5;
+    
+    cout << endl;
+    
+    displayRow();
+
+    
+    if(total==0){
+        cout << "\nThe winner is " << player1 << "!";
+    }
+    else {
+        cout << endl;
+        userVsUser(total, turn+1);
+    }
+        }
+        
+        
+    if (turn==2) {
+        while ((row!='A' || row!='B' || row!='C' || row!='D' || row!='E') && (amount<1 || amount>2)) {
+            cout << "\n" << player2 << "'s turn. \nEnter the letter of the heap and the amount of tokens to nim (1 or 2): ";
+            
+            cin >> row;
+            cin >> amount;
+            
+            if ((p1==0 && row=='A') || (p2==0 && row=='B') || (p3==0 && row=='C') || (p4==0 && row=='D') || (p5==0 && row=='E')) {
+                cout << "\nYou can't remove anymore tokens from row " << row << ". Try again";
+                row=64; amount=0;
+            }
+        }
+        checkRow(row, amount);
+        
+        total=p1+p2+p3+p4+p5;
+        
+        cout << endl;
+        
+        displayRow();
+        
+        if(total==0){
+            cout << "\nThe winner is " << player2 << "!";
+        }
+        
+        else {
+            cout << endl;
+            userVsUser(total, turn-1);
+            
+        }
+    }
+}
+
+void checkRow (char r, int a){
+    
+    if (r == 'A') {
+        if (p1==1 && a==2) {
+            p1-=1;
+            cout << "\nOnly one token was removed from row " << r << ".\n";
+        }
+        else p1-=a;
+    }
+    else if (r == 'B') {
+        if (p2==1 && a==2) {
+            p2-=1;
+            cout << "\nOnly one token was removed from row " << r << ".\n";
+        }
+        else p2-=a;
+    }
+    else if (r == 'C') {
+        if (p3==1 && a==2) {
+            p3-=1;
+            cout << "\nOnly one token was removed from row " << r << ".\n";
+        }
+        else p3-=a;
+    }
+    else if (r == 'D') {
+        if (p4==1 && a==2) {
+            p4-=1;
+            cout << "\nOnly one token was removed from row " << r << ".\n";;
+        }
+        else p4-=a;
+    }
+    else if (r == 'E'){
+        if (p5==1 && a==2) {
+            p5-=1;
+            cout << "\nOnly one token was removed from row " << r << ".\n";;
+        }
+        else p5-=a;
+    }
+    
+}
+
+void displayRow(){
+    
+    for (size_t i=0; i<two_players_heaps; i++) {
+        cout << ascii++ << ". ";
+        if(twoplayers[i]==1){
+            for (int j=0; j<p1; j++) {
+                cout << "O ";
+            }
+            cout << endl;
+        }
+        else if (twoplayers[i]==2) {
+            for (int j=0; j<p2; j++) {
+                cout << "O ";
+            }
+            cout << endl;
+        }
+        else if (twoplayers[i]==3) {
+            for (int j=0; j<p3; j++) {
+                cout << "O ";
+            }
+            cout << endl;
+        }
+        else if (twoplayers[i]==4) {
+            for (int j=0; j<p4; j++) {
+                cout << "O ";
+            }
+            cout << endl;
+        }
+        else if (twoplayers[i]==5) {
+            for (int j=0; j<p5; j++) {
+                cout << "O ";
+            }
+            cout << endl;
+        }
+    }
+}
+
+//////////// USER VS PC
+void PCvsUSER(int turn)
+{
+    unsigned char row = 64;
+    int amount = 0;
+    ascii = 65;
+
+    if (turn == 1) // User's turn
+    {
+        while (((row!='A'&& row_a.size()==0) || (row!='B' && row_b.size()==0)|| (row!='C' && row_c.size()==0) || (row!='D'&& row_d.size()==0) || (row!='E'&& row_e.size()==0) || (row!='F'&& row_f.size()==0) ||(row!='G' && row_g.size()==0)||(row!='H'&& row_h.size()==0) ||(row!='I'&& row_i.size()==0) ||(row!='J' && row_j.size()==0)) && (amount < 1 || amount > 2))
+        {
+            cout << "\n" << player1 << "'s turn. \nEnter the letter of the heap (A, B, C...) and the amount of tokens to nim (1 or 2): ";
+            cin >> row >> amount;
+
+            if ((row=='A'&& row_a.size()==0) || (row=='B' && row_b.size()==0)|| (row=='C' && row_c.size()==0) || (row=='D'&& row_d.size()==0) || (row=='E'&& row_e.size()==0) || (row=='F'&& row_f.size()==0) ||(row=='G' && row_g.size()==0)||(row=='H'&& row_h.size()==0) ||(row=='I'&& row_i.size()==0) ||(row=='J' && row_j.size()==0)) {
+                cout << "\nYou can't remove anymore tokens from row " << row << ". Try again";
+                row=64; amount=0;
+            }
+        }
+
+        checkRowVEC(row, amount);
+
+        printvector(heaps);
+
+        vecTotal = row_a.size() + row_b.size() + row_c.size() + row_d.size() + row_e.size() + row_f.size() + row_g.size() + row_h.size() + row_i.size() + row_j.size();
+       
+        if (vecTotal == 0) {
+            cout << "\nThe winner is " << player1 << "!";
+        } else {
+            cout << endl;
+            PCvsUSER(2); // Next turn is computer's turn
+        }
+    }
+    else if (turn == 2) // Computer's turn
+    {
+        // Computer's strategy Implementation
+        cout<< "Opponent's turn...\n";
+        char compRow;
+        do {
+            uniform_int_distribution <unsigned char> randomchar(65, (65+heaps));
+            compRow = randomchar(engine);// Randomly select a heap from A to J
+        } while (getHeapSize(compRow) == 0);
+
+        uniform_int_distribution <unsigned int> randomamount(1, 2);
+        int compAmount = randomamount(engine);
+
+        checkRowVEC(compRow, compAmount);
+
+        cout<< "Your opponent removed "<< compAmount<< " tokens from row "<< compRow<< endl;
+
+        printvector(heaps);
+
+        vecTotal = row_a.size() + row_b.size() + row_c.size() + row_d.size() + row_e.size() + row_f.size() + row_g.size() + row_h.size() + row_i.size() + row_j.size();
+
+        if (vecTotal == 0) {
+            cout << "\nYou lost. GAME OVER.";
+        } else {
+            cout << endl;
+            PCvsUSER(1); // Next turn is user's turn
+        }
+    }
+}
+
+//////// CHECKROW FOR HEAP VECTORS
+void checkRowVEC (char r, int a)
+{
+    if (r == 'A')
+    {   if (row_a.size()==1 && a==2)
+        {   row_a.erase(row_a.begin()+1);
+            cout << "\nOnly one token was removed from row " << r << ".\n";
+        }
+        else
+        {   for (int i=1; i<=a; i++)
+            row_a.erase(row_a.begin()+a);
+        }
+    }
+    
+        if (r == 'B')
+    {   if (row_b.size()==1 && a==2)
+        {   row_b.erase(row_b.begin()+1);
+            cout << "\nOnly one token was removed from row " << r << ".\n";
+        }
+        else
+        {   for (int i=1; i<=a; i++)
+            row_b.erase(row_b.begin()+a);
+        }
+    }
+    
+        if (r == 'C')
+    {   if (row_c.size()==1 && a==2)
+        {   row_c.erase(row_c.begin()+1);
+            cout << "\nOnly one token was removed from row " << r << ".\n";
+        }
+        else
+        {   for (int i=1; i<=a; i++)
+            row_c.erase(row_c.begin()+a);
+        }
+    }
+    
+        if (r == 'D')
+    {   if (row_d.size()==1 && a==2)
+        {   row_d.erase(row_d.begin()+1);
+            cout << "\nOnly one token was removed from row " << r << ".\n";
+        }
+        else
+        {   for (int i=1; i<=a; i++)
+            row_d.erase(row_d.begin()+a);
+        }
+    }
+    
+        if (r == 'E')
+    {   if (row_e.size()==1 && a==2)
+        {   row_e.erase(row_e.begin()+1);
+            cout << "\nOnly one token was removed from row " << r << ".\n";
+        }
+        else
+        {   for (int i=1; i<=a; i++)
+            row_e.erase(row_e.begin()+a);
+        }
+    }
+    
+        if (r == 'F')
+    {   if (row_f.size()==1 && a==2)
+        {   row_f.erase(row_f.begin()+1);
+            cout << "\nOnly one token was removed from row " << r << ".\n";
+        }
+        else
+        {   for (int i=1; i<=a; i++)
+            row_f.erase(row_f.begin()+a);
+        }
+    }
+    
+        if (r == 'G')
+    {   if (row_g.size()==1 && a==2)
+        {   row_g.erase(row_g.begin()+1);
+            cout << "\nOnly one token was removed from row " << r << ".\n";
+        }
+        else
+        {   for (int i=1; i<=a; i++)
+            row_g.erase(row_g.begin()+a);
+        }
+    }
+    
+        if (r == 'H')
+    {   if (row_h.size()==1 && a==2)
+        {   row_h.erase(row_h.begin()+1);
+            cout << "\nOnly one token was removed from row " << r << ".\n";
+        }
+        else
+        {   for (int i=1; i<=a; i++)
+            row_h.erase(row_h.begin()+a);
+        }
+    }
+    
+        if (r == 'I')
+    {   if (row_i.size()==1 && a==2)
+        {   row_i.erase(row_i.begin()+1);
+            cout << "\nOnly one token was removed from row " << r << ".\n";
+        }
+        else
+        {   for (int i=1; i<=a; i++)
+            row_i.erase(row_i.begin()+a);
+        }
+    }
+    
+        if (r == 'J')
+    {   if (row_j.size()==1 && a==2)
+        {   row_j.erase(row_j.begin()+1);
+            cout << "\nOnly one token was removed from row " << r << ".\n";
+        }
+        else
+        {   for (int i=1; i<=a; i++)
+            row_j.erase(row_j.begin()+a);
+        }
+    }
+
+}
+
+///////////////////////////////////
+void randomz(int token){
+
+    int nbr=0;
+    token-=5;
+
+    for (int i=1; i<=5; i++){
+       // while (y==0 && i<5){
+
+        if(token<=0){
+            nbr=0;
+            token=0;
+        }
+        if(i==5){
+            nbr = token;
+        }
+
+        else {
+                uniform_int_distribution <unsigned int> randomInt(0, token);
+                nbr = randomInt(engine);
+
+        }
+
+        if (i==1) {
+            p1+=nbr;
+            cout<< "A. ";
+            for (int j=p1; j>0; j--)
+            cout<< "O ";
+            token -=nbr;
+            }
+        if (i==2) {
+            p2+=nbr;
+            cout<< "B. ";
+            for (int j=p2; j>0; j--)
+            cout<< "O ";
+            token -= nbr;
+            }
+        if(i==3){
+            p3+=nbr;
+            cout<< "C. ";
+            for (int j=p3; j>0; j--)
+            cout<< "O ";
+            token -=nbr;
+            }
+        if (i==4) {
+            p4+=nbr;
+            cout<< "D. ";
+            for (int j=p4; j>0; j--)
+            cout<< "O ";
+            token -=nbr;
+            }
+
+        if(i==5){
+            p5+=nbr;
+            cout<< "E. ";
+            for (int j=p5; j>0; j--)
+            cout<< "O ";
+            token -=nbr;
+            }
+
+            cout<< endl;
+
+            }
+    }
+/////// INITIALIZATION OF HEAP VECOTRS (USER VS PC)
+    void vectors(int k, double tokens)
+{
+    if (k==1)
+    {
+        ascii = 65;
+        cout << ascii++ << ". ";
+            for (double i=0; i<tokens; i++)
+            {
+            row_a.push_back("O");
+            cout<< row_a[i];
+            }
+    }
+
+    else if (k==2)
+    {
+        cout << ascii++ << ". ";
+            for (double i=0; i<tokens; i++)
+            {
+            row_b.push_back("O");
+            cout<< row_b[i];
+            }
+    }
+
+    else if (k==3)
+    {
+        cout << ascii++ << ". ";
+            for (double i=0; i<tokens; i++)
+            {
+            row_c.push_back("O");
+            cout<< row_c[i];
+            }
+    }
+
+    else if (k==4)
+    {
+        cout << ascii++ << ". ";
+            for (double i=0; i<tokens; i++)
+            {
+            row_d.push_back("O");
+            cout<< row_d[i];
+            }
+    }
+
+    else if (k==5)
+    {
+        cout << ascii++ << ". ";
+            for (double i=0; i<tokens; i++)
+            {
+            row_e.push_back("O");
+            cout<< row_e[i];
+            }
+    }
+
+    else if (k==6)
+    {
+        cout << ascii++ << ". ";
+            for (double i=0; i<tokens; i++)
+            {
+            row_f.push_back("O");
+            cout<< row_f[i];
+            }
+    }
+
+    else if (k==7)
+    {
+        cout << ascii++ << ". ";
+            for (double i=0; i<tokens; i++)
+            {
+            row_g.push_back("O");
+            cout<< row_g[i];
+            }
+    }
+
+    else if (k==8)
+    {
+        cout << ascii++ << ". ";
+            for (double i=0; i<tokens; i++)
+            {
+            row_h.push_back("O");
+            cout<< row_h[i];
+            }
+    }
+
+    else if (k==9)
+    {
+        cout << ascii++ << ". ";
+            for (double i=0; i<tokens; i++)
+            {
+            row_i.push_back("O");
+            cout<< row_i[i];
+            }
+    }
+
+    else if (k==10)
+    {
+        cout << ascii++ << ". ";
+            for (double i=0; i<tokens; i++)
+            {
+            row_j.push_back("O");
+            cout<< row_j[i];
+            }
+    }
+}
+
+
+//////// PRINT HEAP VECTOR
+void printvector(int heaps)
+{
+
+for (int i=0; i<= heaps; i++)
+{
+ascii = 65;
+    if (row_a.size()!=0 && i==1)
+    {
+    cout << ascii << ". ";
+    for (size_t i=0; i<row_a.size(); i++)
+    cout<< row_a[i];
+    cout<< endl;
+    }
+    else if (row_a.size()==0&& i==1)
+    cout << ascii << ". \n";
+ascii = 66;
+    if (row_b.size()!=0 && i==2)
+    {
+    cout << ascii << ". ";
+    for (size_t i=0; i<row_b.size(); i++)
+    cout<< row_b[i];
+cout<< endl;
+    }
+    else if (row_b.size()==0&& i==2)
+    cout << ascii << ". \n";
+ascii = 67;
+    if (row_c.size()!=0 && i==3)
+    {
+    cout << ascii << ". ";
+    for (size_t i=0; i<row_c.size(); i++)
+    cout<< row_c[i];
+cout<< endl;
+    }
+    else if (row_c.size()==0&& i==3)
+    cout << ascii << ". \n";
+ascii = 68;
+    if (row_d.size()!=0 && i==4)
+    {
+    cout << ascii << ". ";
+    for (size_t i=0; i<row_d.size(); i++)
+    cout<< row_d[i];
+cout<< endl;
+    }
+    else if (row_d.size()==0&& i==4)
+    cout << ascii << ". \n";
+ascii = 69;
+    if (row_e.size()!=0 && i==5)
+    {
+    cout << ascii << ". ";
+    for (size_t i=0; i<row_e.size(); i++)
+    cout<< row_e[i];
+cout<< endl;
+    }
+    else if (row_e.size()==0&& i==5)
+    cout << ascii << ". \n";
+ascii = 70;
+    if (row_f.size()!=0 && i==6)
+    {
+    cout << ascii << ". ";
+    for (size_t i=0; i<row_f.size(); i++)
+    cout<< row_f[i];
+cout<< endl;
+    }
+    else if (row_f.size()==0&& i==6)
+    cout << ascii << ". \n";
+ascii = 71;
+    if (row_g.size()!=0 && i==7)
+    {
+    cout << ascii << ". ";
+    for (size_t i=0; i<row_g.size(); i++)
+    cout<< row_g[i];
+cout<< endl;
+    }
+    else if (row_g.size()==0&& i==7)
+    cout << ascii << ". \n";
+ascii = 72;
+    if (row_h.size()!=0 && i==8)
+    {
+    cout << ascii << ". ";
+    for (size_t i=0; i<row_h.size(); i++)
+    cout<< row_h[i];
+cout<< endl;
+    }
+    else if (row_h.size()==0&& i==8)
+    cout << ascii << ". \n";
+ascii = 73;
+    if (row_i.size()!=0 && i==9)
+    {
+    cout << ascii << ". ";
+    for (size_t i=0; i<row_i.size(); i++)
+    cout<< row_i[i];
+cout<< endl;
+    }
+    else if (row_i.size()==0&& i==9)
+    cout << ascii << ". \n";
+ascii = 74;
+    if (row_j.size()!=0 && i==10)
+    {
+    cout << ascii << ". ";
+    for (size_t i=0; i<row_j.size(); i++)
+    cout<< row_j[i];
+cout<< endl;
+    }
+    else if (row_j.size()==0&& i==10)
+    cout << ascii << ". \n";
+}
+}
+
+size_t getHeapSize(char row) {
+    switch (row) {
+        case 'A':
+            return row_a.size();
+        case 'B':
+            return row_b.size();
+        case 'C':
+            return row_c.size();
+        case 'D':
+            return row_d.size();
+        case 'E':
+            return row_e.size();
+        case 'F':
+            return row_f.size();
+        case 'G':
+            return row_g.size();
+        case 'H':
+            return row_h.size();
+        case 'I':
+            return row_i.size();
+        case 'J':
+            return row_j.size();
+        default:
+            return 0; // Return 0 for invalid row identifiers
+    }
+}
